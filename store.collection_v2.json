@@ -1,0 +1,2216 @@
+{
+	"info": {
+		"_postman_id": "7560112d-36ea-48a2-b0e2-6c4088d15fbb",
+		"name": "store",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40597664",
+		"_collection_link": "https://www.postman.com/api-team-4930/workspace/postman-practice-olena-shtronda/collection/40597664-7560112d-36ea-48a2-b0e2-6c4088d15fbb?action=share&source=collection_link&creator=40597664"
+	},
+	"item": [
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "List products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Product list is not empty', () => {\r",
+									"  pm.expect(jsonData.length).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.test('Products are sorted by ID ascending', () => {\r",
+									"  const ids = jsonData.map(p => p.id);\r",
+									"  const sorted = [...ids].sort((a,b) => a - b);\r",
+									"\r",
+									"  pm.expect(ids).to.eql(sorted);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get product by existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Product ID equals the requested ID', () => {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const requestedId = url.split('/').pop();\r",
+									"\r",
+									"    pm.expect(jsonData.id).to.eql(Number(requestedId));\r",
+									"});\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('getOneProductRequest'))();\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{oneProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{oneProductId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get product by nonexistent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('getOneProductRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(404, 200);\r",
+									"\r",
+									"pm.test('Response body is empty object', function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(Object.keys(jsonData).length).to.eql(0);\r",
+									"});\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('Status text is \"Not Found\"', function () {\r",
+									"    pm.expect(pm.response.status).to.eql('Not Found');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{nonexistentProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{nonexistentProductId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(201, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('Returned product matches request data', () => {\r",
+									"    pm.expect(jsonData.name).to.eql(pm.variables.get('randomProductName'));\r",
+									"    pm.expect(jsonData.price).to.eql(pm.variables.get('randomProductPrice'));\r",
+									"    pm.expect(jsonData.sku).to.eql(pm.variables.get('randomProductSku'));\r",
+									"    pm.expect(jsonData.description).to.eql(pm.variables.get('randomProductDescription'));\r",
+									"});\r",
+									"\r",
+									"pm.test('Price is positive', () => {\r",
+									"    pm.expect(jsonData.price).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.test('Name and description are not empty', () => {\r",
+									"    pm.expect(jsonData.name).to.not.be.empty;\r",
+									"    pm.expect(jsonData.description).to.not.be.empty;\r",
+									"});\r",
+									"\r",
+									"eval(pm.variables.get('deleteProductRequest'))(jsonData.id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{randomProductName}}\",\r\n    \"price\": {{randomProductPrice}},\r\n    \"sku\": {{randomProductSku}},\r\n    \"description\": \"{{randomProductDescription}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product with empty fields",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(400, 200);\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Response does not contain an ID', () => {\r",
+									"  pm.expect(jsonData.id).to.be.undefined;\r",
+									"});\r",
+									"\r",
+									"pm.test('Product is not created', () => {\r",
+									"  pm.expect(pm.response.code).to.not.equal(201);\r",
+									"});\r",
+									"\r",
+									"eval(pm.variables.get('deleteProductRequest'))(jsonData.id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"\",\r\n    \"price\": \"\",\r\n    \"sku\": \"\",\r\n    \"description\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update product",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('createProductRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": {{createdProductId}},\r\n    \"name\": \"{{randomProductName}}\",\r\n    \"price\": {{randomProductPrice}},\r\n    \"sku\": {{randomProductSku}},\r\n    \"description\": \"{{randomProductDescription}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove product by existent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('createProductRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Product ID equals the requested ID', () => {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const requestedId = url.split('/').pop();\r",
+									"\r",
+									"    pm.expect(jsonData.id).to.eql(Number(requestedId));\r",
+									"});\r",
+									"\r",
+									"pm.test('Deleted product fields match the created product', () => {\r",
+									"    pm.expect(jsonData.name).to.eql(pm.variables.get('createdProductName'));\r",
+									"    pm.expect(jsonData.price).to.eql(pm.variables.get('createdProductPrice'));\r",
+									"    pm.expect(jsonData.sku).to.eql(pm.variables.get('createdProductSku'));\r",
+									"    pm.expect(jsonData.description).to.eql(pm.variables.get('createdProductDescription'));\r",
+									"});\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{createdProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{createdProductId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							"const names = ['orange', 'banana', 'apple', 'melon', 'pumpkin'];\r",
+							"const randomName = names[Math.floor(Math.random() * names.length)];\r",
+							"\r",
+							"const randomPrice = Math.floor(Math.random() * 100) + 1;\r",
+							"const randomSku = Math.floor(Math.random() * 900000000000) + 100000000000;\r",
+							"\r",
+							"const descriptions = [\r",
+							"    'fresh and delicious',\r",
+							"    'organic product',\r",
+							"    'high quality',\r",
+							"    'limited edition',\r",
+							"    'special offer'\r",
+							"];\r",
+							"\r",
+							"const randomDescription = descriptions[Math.floor(Math.random() * descriptions.length)];\r",
+							"\r",
+							"pm.variables.set('randomProductName', randomName);\r",
+							"pm.variables.set('randomProductPrice', randomPrice);\r",
+							"pm.variables.set('randomProductSku', randomSku);\r",
+							"pm.variables.set('randomProductDescription', randomDescription);\r",
+							"\r",
+							"const createProductRequest = async () => {\r",
+							"  const url = pm.collectionVariables.get('baseUrl');\r",
+							"  const productName = pm.variables.get('randomProductName');\r",
+							"  const productPrice = pm.variables.get('randomProductPrice');\r",
+							"  const productSku = pm.variables.get('randomProductSku');\r",
+							"  const productDescription = pm.variables.get('randomProductDescription');\r",
+							"\r",
+							"  const requestStructure = {\r",
+							"    url: url + '/products',\r",
+							"    method: 'POST',\r",
+							"    header: {\r",
+							"      'Content-Type': 'application/json',\r",
+							"    },\r",
+							"    body: {\r",
+							"      mode: 'raw',\r",
+							"      raw: JSON.stringify({\r",
+							"        \"name\": productName,\r",
+							"        \"price\": productPrice,\r",
+							"        \"sku\": productSku,\r",
+							"        \"description\": productDescription\r",
+							"      })\r",
+							"    }\r",
+							"  };\r",
+							"\r",
+							"  const response = await pm.sendRequest(requestStructure);\r",
+							"\r",
+							"  pm.variables.set('createdProductName', response.json().name);\r",
+							"  pm.variables.set('createdProductPrice', response.json().price);\r",
+							"  pm.variables.set('createdProductSku', response.json().sku);\r",
+							"  pm.variables.set('createdProductDescription', response.json().description);\r",
+							"  pm.variables.set('createdProductId', response.json().id);\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('createProductRequest', createProductRequest.toString());\r",
+							"\r",
+							"const deleteProductRequest = (createdProductId) => {\r",
+							"  const url = pm.collectionVariables.get('baseUrl');\r",
+							"\r",
+							"  const requestStructure = {\r",
+							"    url: url + '/products/' + createdProductId,\r",
+							"    method: 'DELETE',\r",
+							"    header: {\r",
+							"      'Content-Type': 'application/json',\r",
+							"    },\r",
+							"    body: {}\r",
+							"  };\r",
+							"\r",
+							"  pm.sendRequest(requestStructure);\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('deleteProductRequest', deleteProductRequest.toString());\r",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							"const checkResponseAgainstUniversalJsonSchema = () => {\r",
+							"  const jsonData = pm.response.json();\r",
+							"\r",
+							"  const productSchema = {\r",
+							"    type: \"object\",\r",
+							"    required: [\"id\", \"name\", \"price\", \"sku\", \"description\"],\r",
+							"    properties: {\r",
+							"      id: { type: \"number\" },\r",
+							"      name: { type: \"string\" },\r",
+							"      price: { type: \"number\" },\r",
+							"      sku: { type: \"number\" },\r",
+							"      description: { type: \"string\" }\r",
+							"    }\r",
+							"  };\r",
+							"\r",
+							"  const universalSchema = {\r",
+							"    anyOf: [\r",
+							"      productSchema,\r",
+							"      {\r",
+							"        type: \"array\",\r",
+							"        items: productSchema\r",
+							"      }\r",
+							"    ]\r",
+							"  };\r",
+							"\r",
+							"  pm.test('Response matches universal JSON Schema', () => {\r",
+							"    pm.expect(jsonData).to.have.jsonSchema(universalSchema);\r",
+							"  });\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('checkResponseAgainstUniversalJsonSchema', checkResponseAgainstUniversalJsonSchema.toString());\r",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "List orders",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Order list is not empty', () => {\r",
+									"  pm.expect(jsonData.length).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.test('Orders are sorted by ID ascending', () => {\r",
+									"  const ids = jsonData.map(p => p.id);\r",
+									"  const sorted = [...ids].sort((a,b) => a - b);\r",
+									"\r",
+									"  pm.expect(ids).to.eql(sorted);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get order by existent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('getOneOrderRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Order ID equals the requested ID', () => {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const requestedId = url.split('/').pop();\r",
+									"\r",
+									"    pm.expect(jsonData.id).to.eql(Number(requestedId));\r",
+									"});\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{oneOrderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{oneOrderId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get order by nonexistent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('getOneOrderRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(404, 200);\r",
+									"\r",
+									"pm.test('Response body is empty object', function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(Object.keys(jsonData).length).to.eql(0);\r",
+									"});\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('Status text is Not Found', function () {\r",
+									"    pm.expect(pm.response.status).to.eql('Not Found');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{nonexistentOrderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{nonexistentOrderId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(201, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('Returned product matches request data', () => {\r",
+									"    pm.expect(jsonData.name).to.eql(pm.variables.get('oneProductName'));\r",
+									"    pm.expect(jsonData.sku).to.eql(pm.variables.get('oneProductSku'));\r",
+									"});\r",
+									"\r",
+									"eval(pm.variables.get('deleteOrderRequest'))(jsonData.id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('getOneProductRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{oneProductName}}\",\r\n    \"sku\": {{oneProductSku}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create order for nonexistent product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 400 or 404 for nonexistent product', function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404]);\r",
+									"});\r",
+									"\r",
+									"pm.test('Response time is less than 200ms', function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Response does not include an id', function () {\r",
+									"  pm.expect(jsonData).to.not.have.property('id');\r",
+									"});\r",
+									"\r",
+									"eval(pm.variables.get('deleteOrderRequest'))(jsonData.id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// eval(pm.collectionVariables.get('getOneProductRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{randomName}}\",\r\n    \"sku\": {{randomSku}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update order",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"await eval(pm.collectionVariables.get('getOneProductRequest'))();\r",
+									"\r",
+									"await eval(pm.variables.get('createOrderRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('Returned product matches request data', () => {\r",
+									"    pm.expect(jsonData.name).to.eql(pm.variables.get('randomName'));\r",
+									"    pm.expect(jsonData.sku).to.eql(pm.variables.get('randomSku'));\r",
+									"});\r",
+									"\r",
+									"eval(pm.variables.get('deleteOrderRequest'))(jsonData.id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": {{createdOrderId}},\r\n    \"name\": \"{{randomName}}\",\r\n    \"sku\": {{randomSku}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove order by existent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"await eval(pm.collectionVariables.get('getOneProductRequest'))();\r",
+									"\r",
+									"await eval(pm.variables.get('createOrderRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Order ID equals the requested ID', () => {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const requestedId = url.split('/').pop();\r",
+									"\r",
+									"    pm.expect(jsonData.id).to.eql(Number(requestedId));\r",
+									"});\r",
+									"\r",
+									"pm.test('Deleted order fields match the created order', () => {\r",
+									"    pm.expect(jsonData.name).to.eql(pm.variables.get('createdOrderName'));\r",
+									"    pm.expect(jsonData.sku).to.eql(pm.variables.get('createdOrderSku'));\r",
+									"});\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{createdOrderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{createdOrderId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							"const names = ['orange', 'banana', 'apple', 'melon', 'pumpkin'];\r",
+							"const randomName = names[Math.floor(Math.random() * names.length)];\r",
+							"\r",
+							"const randomSku = Math.floor(Math.random() * 900000000000) + 100000000000;\r",
+							"\r",
+							"pm.variables.set('randomName', randomName);\r",
+							"pm.variables.set('randomSku', randomSku);\r",
+							"\r",
+							"const getOneOrderRequest = async () => {\r",
+							"  const url = pm.collectionVariables.get('baseUrl');\r",
+							"\r",
+							"  const requestStructure = {\r",
+							"    url: url + '/orders',\r",
+							"    method: 'GET',\r",
+							"    header: {\r",
+							"      'Content-Type': 'application/json',\r",
+							"    }\r",
+							"  };\r",
+							"\r",
+							"  const response = await pm.sendRequest(requestStructure);\r",
+							"  const orders = response.json();\r",
+							"\r",
+							"  if (!Array.isArray(orders) || orders.length === 0) {\r",
+							"    throw new Error('The /orders endpoint returned an empty list or invalid format.');\r",
+							"  }\r",
+							"\r",
+							"  const oneOrder = orders[Math.floor(Math.random() * orders.length)];\r",
+							"\r",
+							"  pm.variables.set('oneOrderId', oneOrder.id);\r",
+							"  pm.variables.set('oneOrderName', oneOrder.name);\r",
+							"  pm.variables.set('oneOrderSku', oneOrder.sku);\r",
+							"\r",
+							"  const existingIds = orders.map(o => o.id);\r",
+							"\r",
+							"  let randomNonexistentId;\r",
+							"  do {\r",
+							"    randomNonexistentId = Math.floor(Math.random() * 10000) + 1;\r",
+							"  } while (existingIds.includes(randomNonexistentId));\r",
+							"\r",
+							"  pm.variables.set('nonexistentOrderId', randomNonexistentId);\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('getOneOrderRequest', getOneOrderRequest.toString());\r",
+							"\r",
+							"const createOrderRequest = async () => {\r",
+							"  const url = pm.collectionVariables.get('baseUrl');\r",
+							"  const orderName = pm.collectionVariables.get('oneProductName');\r",
+							"  const orderSku = pm.collectionVariables.get('oneProductSku');\r",
+							"\r",
+							"  const requestStructure = {\r",
+							"    url: url + '/orders',\r",
+							"    method: 'POST',\r",
+							"    header: {\r",
+							"      'Content-Type': 'application/json',\r",
+							"    },\r",
+							"    body: {\r",
+							"      mode: 'raw',\r",
+							"      raw: JSON.stringify({\r",
+							"        \"name\": orderName,\r",
+							"        \"sku\": orderSku\r",
+							"      })\r",
+							"    }\r",
+							"  };\r",
+							"\r",
+							"  const response = await pm.sendRequest(requestStructure);\r",
+							"\r",
+							"  pm.variables.set('createdOrderName', response.json().name);\r",
+							"  pm.variables.set('createdOrderSku', response.json().sku);\r",
+							"  pm.variables.set('createdOrderId', response.json().id);\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('createOrderRequest', createOrderRequest.toString());\r",
+							"\r",
+							"const deleteOrderRequest = async (orderId) => {\r",
+							"  const url = pm.collectionVariables.get('baseUrl');\r",
+							"\r",
+							"  const requestStructure = {\r",
+							"    url: url + '/orders/' + orderId,\r",
+							"    method: 'DELETE',\r",
+							"    header: {\r",
+							"      'Content-Type': 'application/json',\r",
+							"    },\r",
+							"    body: {}\r",
+							"  };\r",
+							"\r",
+							"  pm.sendRequest(requestStructure);\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('deleteOrderRequest', deleteOrderRequest.toString());\r",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							"const checkResponseAgainstUniversalJsonSchema = () => {\r",
+							"  const jsonData = pm.response.json();\r",
+							"\r",
+							"  const productSchema = {\r",
+							"    type: \"object\",\r",
+							"    required: [\"id\", \"name\", \"sku\"],\r",
+							"    properties: {\r",
+							"      id: { type: \"number\" },\r",
+							"      name: { type: \"string\" },\r",
+							"      sku: { type: \"number\" }\r",
+							"    }\r",
+							"  };\r",
+							"\r",
+							"  const universalSchema = {\r",
+							"    oneOf: [\r",
+							"      productSchema,\r",
+							"      {\r",
+							"        type: \"array\",\r",
+							"        items: productSchema\r",
+							"      }\r",
+							"    ]\r",
+							"  };\r",
+							"\r",
+							"  pm.test('Response matches universal JSON Schema', () => {\r",
+							"    pm.expect(jsonData).to.have.jsonSchema(universalSchema);\r",
+							"  });\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('checkResponseAgainstUniversalJsonSchema', checkResponseAgainstUniversalJsonSchema.toString());\r",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "List users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Emails are valid', () => {\r",
+									"    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\r",
+									"    jsonData.forEach(user => {\r",
+									"        pm.expect(user.email).to.match(emailRegex);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test('Users list is not empty', () => {\r",
+									"  pm.expect(jsonData.length).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.test('Users are sorted by ID ascending', () => {\r",
+									"  const ids = jsonData.map(p => p.id);\r",
+									"  const sorted = [...ids].sort((a,b) => a - b);\r",
+									"\r",
+									"  pm.expect(ids).to.eql(sorted);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List users with pagination",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const randomPage = Math.floor(Math.random() * 3) + 1;\r",
+									"const randomPageSize = Math.floor(Math.random() * 3) + 1;\r",
+									"\r",
+									"pm.variables.set('page', randomPage);\r",
+									"pm.variables.set('pageSize', randomPageSize);\r",
+									"\r",
+									"console.log(`page=${randomPage}&pageSize=${randomPageSize}`);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Response is an array', () => {\r",
+									"    pm.expect(jsonData).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"pm.test('Returned elements respect pageSize limit', () => {\r",
+									"    pm.expect(jsonData.length).to.be.at.most(Number(pm.variables.get('pageSize')));\r",
+									"});\r",
+									"\r",
+									"pm.test('Pagination query params applied', () => {\r",
+									"    const url = pm.request.url.query.toObject();\r",
+									"    pm.expect(url.page).to.exist;\r",
+									"    pm.expect(url.pageSize).to.exist;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users?page={{page}}&pageSize={{pageSize}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{page}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{pageSize}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List users sorted ASC by firstName",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"const sortKey = pm.request.url.query.get('sortKey');\r",
+									"const sortOrder = pm.request.url.query.get('sortOrder');\r",
+									"\r",
+									"pm.test('Response is an array', () => {\r",
+									"    pm.expect(jsonData).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"pm.test(`All items have the key \"${sortKey}\"`, () => {\r",
+									"    pm.expect(jsonData.every(item => item.hasOwnProperty(sortKey))).to.be.true;\r",
+									"});\r",
+									"\r",
+									"pm.test(`Items are sorted by \"${sortKey}\" in ASC order`, () => {\r",
+									"    if (sortOrder === 'ASC') {\r",
+									"        for (let i = 0; i < jsonData.length - 1; i++) {\r",
+									"            pm.expect(jsonData[i][sortKey] <= jsonData[i + 1][sortKey]).to.be.true;\r",
+									"        }\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users?sortKey=firstName&sortOrder=ASC",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "sortKey",
+									"value": "firstName"
+								},
+								{
+									"key": "sortOrder",
+									"value": "ASC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List users sorted DESC by firstName",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"const sortKey = pm.request.url.query.get('sortKey');\r",
+									"const sortOrder = pm.request.url.query.get('sortOrder');\r",
+									"\r",
+									"pm.test('Response is an array', () => {\r",
+									"    pm.expect(jsonData).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"pm.test(`All items have the key \"${sortKey}\"`, () => {\r",
+									"    pm.expect(jsonData.every(item => item.hasOwnProperty(sortKey))).to.be.true;\r",
+									"});\r",
+									"\r",
+									"pm.test(`Items are sorted by \"${sortKey}\" in DESC order`, () => {\r",
+									"    if (sortOrder === 'DESC') {\r",
+									"        for (let i = 0; i < jsonData.length - 1; i++) {\r",
+									"            pm.expect(jsonData[i][sortKey] >= jsonData[i + 1][sortKey]).to.be.true;\r",
+									"        }\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users?sortKey=firstName&sortOrder=DESC",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "sortKey",
+									"value": "firstName"
+								},
+								{
+									"key": "sortOrder",
+									"value": "DESC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user by existent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('getOneUserRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('User ID equals the requested ID', () => {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const requestedId = url.split('/').pop();\r",
+									"\r",
+									"    pm.expect(jsonData.id).to.eql(Number(requestedId));\r",
+									"});\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user by nonexistent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('getOneUserRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(404, 200);\r",
+									"\r",
+									"pm.test('Response body is empty object', function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(Object.keys(jsonData).length).to.eql(0);\r",
+									"});\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('Status text is \"Not Found\"', function () {\r",
+									"    pm.expect(pm.response.status).to.eql('Not Found');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{nonexistentUserId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{nonexistentUserId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(201, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Returned user matches request data', () => {\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.variables.get('randomFirstName'));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.variables.get('randomLastName'));\r",
+									"    pm.expect(jsonData.email).to.eql(pm.variables.get('randomEmail'));\r",
+									"    pm.expect(jsonData.dateOfBirth).to.eql(pm.variables.get('randomDateOfBirth'));\r",
+									"    pm.expect(jsonData.emailVerified).to.eql(pm.variables.get('randomEmailVerified'));\r",
+									"    pm.expect(jsonData.signUpDate).to.eql(pm.variables.get('randomSignUpDate'));\r",
+									"    pm.expect(jsonData.level).to.eql(pm.variables.get('randomLevel'));\r",
+									"});\r",
+									"\r",
+									"pm.test('Email is valid', () => {\r",
+									"    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\r",
+									"    pm.expect(jsonData.email).to.match(emailRegex);\r",
+									"});\r",
+									"\r",
+									"pm.test('Dates are valid', () => {\r",
+									"    const dateRegex = /^\\d{4}-\\d{2}-\\d{2}$/;\r",
+									"    pm.expect(jsonData.dateOfBirth).to.match(dateRegex);\r",
+									"    pm.expect(jsonData.signUpDate).to.match(dateRegex);\r",
+									"});\r",
+									"\r",
+									"pm.test('dateOfBirth is before signUpDate', () => {\r",
+									"    pm.expect(new Date(jsonData.dateOfBirth)).to.be.below(new Date(jsonData.signUpDate));\r",
+									"});\r",
+									"\r",
+									"pm.test('Level is valid', () => {\r",
+									"    const validLevels = ['lord', 'consumer', 'admin'];\r",
+									"    pm.expect(validLevels).to.include(jsonData.level);\r",
+									"});\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"eval(pm.variables.get('deleteUserRequest'))(jsonData.id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"{{randomFirstName}}\",\r\n    \"lastName\": \"{{randomLastName}}\",\r\n    \"email\": \"{{randomEmail}}\",\r\n    \"dateOfBirth\": \"{{randomDateOfBirth}}\",\r\n    \"emailVerified\": {{randomEmailVerified}},\r\n    \"signUpDate\": \"{{randomSignUpDate}}\",\r\n    \"status\": \"active\",\r\n    \"level\": \"{{randomLevel}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('createUserRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('Returned user matches request data', () => {\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.variables.get('randomFirstName'));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.variables.get('randomLastName'));\r",
+									"    pm.expect(jsonData.email).to.eql(pm.variables.get('randomEmail'));\r",
+									"    pm.expect(jsonData.dateOfBirth).to.eql(pm.variables.get('randomDateOfBirth'));\r",
+									"    pm.expect(jsonData.emailVerified).to.eql(pm.variables.get('randomEmailVerified'));\r",
+									"    pm.expect(jsonData.signUpDate).to.eql(pm.variables.get('randomSignUpDate'));\r",
+									"    pm.expect(jsonData.level).to.eql(pm.variables.get('randomLevel'));\r",
+									"    pm.expect(jsonData.status).to.eql('active');\r",
+									"});\r",
+									"\r",
+									"pm.test('Email is valid', () => {\r",
+									"    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\r",
+									"    pm.expect(jsonData.email).to.match(emailRegex);\r",
+									"});\r",
+									"\r",
+									"pm.test('Dates are valid', () => {\r",
+									"    const dateRegex = /^\\d{4}-\\d{2}-\\d{2}$/;\r",
+									"    pm.expect(jsonData.dateOfBirth).to.match(dateRegex);\r",
+									"    pm.expect(jsonData.signUpDate).to.match(dateRegex);\r",
+									"});\r",
+									"\r",
+									"pm.test('dateOfBirth is before signUpDate', () => {\r",
+									"    pm.expect(new Date(jsonData.dateOfBirth)).to.be.below(new Date(jsonData.signUpDate));\r",
+									"});\r",
+									"\r",
+									"pm.test('Level is valid', () => {\r",
+									"    const validLevels = ['lord', 'consumer', 'admin'];\r",
+									"    pm.expect(validLevels).to.include(jsonData.level);\r",
+									"});\r",
+									"\r",
+									"eval(pm.variables.get('deleteUserRequest'))(jsonData.id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"{{randomFirstName}}\",\r\n    \"lastName\": \"{{randomLastName}}\",\r\n    \"email\": \"{{randomEmail}}\",\r\n    \"dateOfBirth\": \"{{randomDateOfBirth}}\",\r\n    \"emailVerified\": {{randomEmailVerified}},\r\n    \"signUpDate\": \"{{randomSignUpDate}}\",\r\n    \"status\": \"active\",\r\n    \"level\": \"{{randomLevel}}\",\r\n    \"id\": {{createdUserId}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove user by existent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('createUserRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(200, 200);\r",
+									"\r",
+									"eval(pm.variables.get('checkResponseAgainstUniversalJsonSchema'))();\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('User ID equals the requested ID', () => {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const requestedId = url.split('/').pop();\r",
+									"\r",
+									"    pm.expect(jsonData.id).to.eql(Number(requestedId));\r",
+									"});\r",
+									"\r",
+									"pm.test('Deleted user fields match the created user', () => {\r",
+									"    pm.expect(jsonData.firstName).to.eql(pm.variables.get('createdUserFirstName'));\r",
+									"    pm.expect(jsonData.lastName).to.eql(pm.variables.get('createdUserLastName'));\r",
+									"    pm.expect(jsonData.email).to.eql(pm.variables.get('createdUserEmail'));\r",
+									"    pm.expect(jsonData.dateOfBirth).to.eql(pm.variables.get('createdUserDateOfBirth'));\r",
+									"    pm.expect(jsonData.emailVerified).to.eql(pm.variables.get('createdUserEmailVerified'));\r",
+									"    pm.expect(jsonData.signUpDate).to.eql(pm.variables.get('createdUserSignUpDate'));\r",
+									"    pm.expect(jsonData.level).to.eql(pm.variables.get('createdUserLevel'));\r",
+									"    pm.expect(jsonData.status).to.eql('active');\r",
+									"});\r",
+									"\r",
+									"pm.test('Response is a single object', () => {\r",
+									"  pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{createdUserId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{createdUserId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove user by nonexistent ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"eval(pm.variables.get('getOneUserRequest'))();"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.collectionVariables.get('checkStatusCodeAndResponseTime'))(404, 200);\r",
+									"\r",
+									"pm.test('Content-Type is application/json', function () {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{nonexistentUserId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{nonexistentUserId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							"let randomFirstName = pm.variables.replaceIn(\"{{$randomFirstName}}\");\r",
+							"let randomLastName = pm.variables.replaceIn(\"{{$randomLastName}}\");\r",
+							"let randomEmail = pm.variables.replaceIn(\"{{$randomEmail}}\");\r",
+							"\r",
+							"const moment = require('moment');\r",
+							"let twentyYearsAgo = moment().subtract(20, 'years');\r",
+							"let randomDateOfBirth = twentyYearsAgo.format('YYYY-MM-DD');\r",
+							"\r",
+							"let randomEmailVerified = pm.variables.replaceIn(\"{{$randomBoolean}}\") === 'true';\r",
+							"\r",
+							"let oneHourAgo = moment().subtract(1, 'hour');\r",
+							"let randomSignUpDate = oneHourAgo.format('YYYY-MM-DD');\r",
+							"\r",
+							"const levels = ['lord', 'consumer', 'admin'];\r",
+							"const randomLevel = levels[Math.floor(Math.random() * levels.length)];\r",
+							"\r",
+							"pm.variables.set('randomFirstName', randomFirstName);\r",
+							"pm.variables.set('randomLastName', randomLastName);\r",
+							"pm.variables.set('randomEmail', randomEmail);\r",
+							"pm.variables.set('randomDateOfBirth', randomDateOfBirth);\r",
+							"pm.variables.set('randomEmailVerified', randomEmailVerified);\r",
+							"pm.variables.set('randomSignUpDate', randomSignUpDate);\r",
+							"pm.variables.set('randomLevel', randomLevel);\r",
+							"\r",
+							"const getOneUserRequest = async () => {\r",
+							"  const url = pm.collectionVariables.get('baseUrl');\r",
+							"\r",
+							"  const requestStructure = {\r",
+							"    url: url + '/users',\r",
+							"    method: 'GET',\r",
+							"    header: {\r",
+							"      'Content-Type': 'application/json',\r",
+							"    }\r",
+							"  };\r",
+							"\r",
+							"  const response = await pm.sendRequest(requestStructure);\r",
+							"  const users = response.json();\r",
+							"\r",
+							"  if (!Array.isArray(users) || users.length === 0) {\r",
+							"    throw new Error('The /products endpoint returned an empty list or invalid format.');\r",
+							"  }\r",
+							"\r",
+							"  const randomUser = users[Math.floor(Math.random() * users.length)];\r",
+							"\r",
+							"  pm.variables.set('userId', randomUser.id);\r",
+							"  pm.variables.set('userFirstName', randomUser.firstName);\r",
+							"  pm.variables.set('userLastName', randomUser.lastName);\r",
+							"  pm.variables.set('userEmail', randomUser.email);\r",
+							"  pm.variables.set('userDateOfBirth', randomUser.dateOfBirth);\r",
+							"  pm.variables.set('userEmailVerified', randomUser.emailVerified);\r",
+							"  pm.variables.set('userSignUpDate', randomUser.signUpDate);\r",
+							"  pm.variables.set('userStatus', randomUser.status);\r",
+							"  pm.variables.set('userLevel', randomUser.level);\r",
+							"\r",
+							"  const existingIds = users.map(u => u.id);\r",
+							"\r",
+							"  let nonexistentUserId;\r",
+							"  do {\r",
+							"    nonexistentUserId = Math.floor(Math.random() * 10000) + 1;\r",
+							"  } while (existingIds.includes(nonexistentUserId));\r",
+							"\r",
+							"  pm.variables.set('nonexistentUserId', nonexistentUserId);\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('getOneUserRequest', getOneUserRequest.toString());\r",
+							"\r",
+							"const createUserRequest = async () => {\r",
+							"  const url = pm.collectionVariables.get('baseUrl');\r",
+							"  const randomFirstName = pm.variables.get('randomFirstName');\r",
+							"  const randomLastName = pm.variables.get('randomLastName');\r",
+							"  const randomEmail = pm.variables.get('randomEmail');\r",
+							"  const randomDateOfBirth = pm.variables.get('randomDateOfBirth');\r",
+							"  const randomEmailVerified = pm.variables.get('randomEmailVerified');\r",
+							"  const randomSignUpDate = pm.variables.get('randomSignUpDate');\r",
+							"  const randomLevel = pm.variables.get('randomLevel');\r",
+							"\r",
+							"  const requestStructure = {\r",
+							"    url: url + '/users',\r",
+							"    method: 'POST',\r",
+							"    header: {\r",
+							"      'Content-Type': 'application/json',\r",
+							"    },\r",
+							"    body: {\r",
+							"      mode: 'raw',\r",
+							"      raw: JSON.stringify({\r",
+							"        \"firstName\": randomFirstName,\r",
+							"        \"lastName\": randomLastName,\r",
+							"        \"email\": randomEmail,\r",
+							"        \"dateOfBirth\": randomDateOfBirth,\r",
+							"        \"emailVerified\": randomEmailVerified,\r",
+							"        \"signUpDate\": randomSignUpDate,\r",
+							"        \"status\": \"active\",\r",
+							"        \"level\": randomLevel\r",
+							"      })\r",
+							"    }\r",
+							"  };\r",
+							"\r",
+							"  const response = await pm.sendRequest(requestStructure);\r",
+							"\r",
+							"  pm.variables.set('createdUserFirstName', response.json().firstName);\r",
+							"  pm.variables.set('createdUserLastName', response.json().lastName);\r",
+							"  pm.variables.set('createdUserEmail', response.json().email);\r",
+							"  pm.variables.set('createdUserDateOfBirth', response.json().dateOfBirth);\r",
+							"  pm.variables.set('createdUserEmailVerified', response.json().emailVerified);\r",
+							"  pm.variables.set('createdUserSignUpDate', response.json().signUpDate);\r",
+							"  pm.variables.set('createdUserStatus', response.json().status);\r",
+							"  pm.variables.set('createdUserLevel', response.json().level);\r",
+							"  pm.variables.set('createdUserId', response.json().id);\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('createUserRequest', createUserRequest.toString());\r",
+							"\r",
+							"const deleteUserRequest = (createdUserId) => {\r",
+							"  const url = pm.collectionVariables.get('baseUrl');\r",
+							"\r",
+							"  const requestStructure = {\r",
+							"    url: url + '/users/' + createdUserId,\r",
+							"    method: 'DELETE',\r",
+							"    header: {\r",
+							"      'Content-Type': 'application/json',\r",
+							"    },\r",
+							"    body: {}\r",
+							"  };\r",
+							"\r",
+							"  pm.sendRequest(requestStructure);\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('deleteUserRequest', deleteUserRequest.toString());\r",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							"const checkResponseAgainstUniversalJsonSchema = () => {\r",
+							"  const jsonData = pm.response.json();\r",
+							"\r",
+							"  const productSchema = {\r",
+							"    type: \"object\",\r",
+							"    required: [\"id\", \"firstName\", \"lastName\", \"email\", \"dateOfBirth\", \"emailVerified\", \"signUpDate\", \"status\", \"level\"],\r",
+							"    properties: {\r",
+							"      id: { type: \"number\" },\r",
+							"      firstName: { type: \"string\" },\r",
+							"      lastName: { type: \"string\" },\r",
+							"      email: { type: \"string\" },\r",
+							"      dateOfBirth: { type: \"string\", format: \"date\" },\r",
+							"      emailVerified: { type: \"boolean\" },\r",
+							"      signUpDate: { type: \"string\", format: \"date\" },\r",
+							"      status: { type: \"string\" },\r",
+							"      level: { type: \"string\" }\r",
+							"    }\r",
+							"  };\r",
+							"\r",
+							"  const universalSchema = {\r",
+							"    anyOf: [\r",
+							"      productSchema,\r",
+							"      {\r",
+							"        type: \"array\",\r",
+							"        items: productSchema\r",
+							"      }\r",
+							"    ]\r",
+							"  };\r",
+							"\r",
+							"  pm.test('Response matches universal JSON Schema', () => {\r",
+							"    pm.expect(jsonData).to.have.jsonSchema(universalSchema);\r",
+							"  });\r",
+							"};\r",
+							"\r",
+							"pm.variables.set('checkResponseAgainstUniversalJsonSchema', checkResponseAgainstUniversalJsonSchema.toString());\r",
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					"const getOneProductRequest = async () => {\r",
+					"  const url = pm.collectionVariables.get('baseUrl');\r",
+					"\r",
+					"  const requestStructure = {\r",
+					"    url: url + '/products',\r",
+					"    method: 'GET',\r",
+					"    header: {\r",
+					"      'Content-Type': 'application/json',\r",
+					"    }\r",
+					"  };\r",
+					"\r",
+					"  const response = await pm.sendRequest(requestStructure);\r",
+					"  const products = response.json();\r",
+					"\r",
+					"  if (!Array.isArray(products) || products.length === 0) {\r",
+					"    throw new Error('The /products endpoint returned an empty list or invalid format.');\r",
+					"  }\r",
+					"\r",
+					"  const oneProduct = products[Math.floor(Math.random() * products.length)];\r",
+					"\r",
+					"  pm.collectionVariables.set('oneProductName', oneProduct.name);\r",
+					"  pm.collectionVariables.set('oneProductId', oneProduct.id);\r",
+					"  pm.collectionVariables.set('oneProductPrice', oneProduct.price);\r",
+					"  pm.collectionVariables.set('oneProductSku', oneProduct.sku);\r",
+					"  pm.collectionVariables.set('oneProductDescription', oneProduct.description);\r",
+					"\r",
+					"  const existentIds = products.map(p => p.id);\r",
+					"\r",
+					"  let randomNonexistentId;\r",
+					"  do {\r",
+					"    randomNonexistentId = Math.floor(Math.random() * 10000) + 1;\r",
+					"  } while (existentIds.includes(randomNonexistentId));\r",
+					"\r",
+					"  pm.collectionVariables.set('nonexistentProductId', randomNonexistentId);\r",
+					"};\r",
+					"\r",
+					"pm.collectionVariables.set('getOneProductRequest', getOneProductRequest.toString());\r",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					"const checkStatusCodeAndResponseTime = (statusCode, responseTime) => {\r",
+					"  const statusCodeMessage = `Status code is ${statusCode}`;\r",
+					"  const responseTimeMessage = `Response time is less than ${responseTime}ms`;\r",
+					"\r",
+					"  pm.test(statusCodeMessage, function () {\r",
+					"    pm.response.to.have.status(statusCode);\r",
+					"  });\r",
+					"\r",
+					"  pm.test(responseTimeMessage, function () {\r",
+					"    pm.expect(pm.response.responseTime).to.be.below(responseTime);\r",
+					"  });\r",
+					"};\r",
+					"\r",
+					"pm.collectionVariables.set('checkStatusCodeAndResponseTime', checkStatusCodeAndResponseTime.toString());\r",
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000"
+		},
+		{
+			"key": "checkStatusCodeAndResponseTime",
+			"value": ""
+		},
+		{
+			"key": "deleteProductRequest",
+			"value": ""
+		},
+		{
+			"key": "listProductsRequest",
+			"value": ""
+		},
+		{
+			"key": "getOneProductRequest",
+			"value": ""
+		},
+		{
+			"key": "productName",
+			"value": ""
+		},
+		{
+			"key": "productId",
+			"value": ""
+		},
+		{
+			"key": "productPrice",
+			"value": ""
+		},
+		{
+			"key": "productSku",
+			"value": ""
+		},
+		{
+			"key": "productDescription",
+			"value": ""
+		},
+		{
+			"key": "oneProductName",
+			"value": ""
+		},
+		{
+			"key": "oneProductId",
+			"value": ""
+		},
+		{
+			"key": "oneProductPrice",
+			"value": ""
+		},
+		{
+			"key": "oneProductSku",
+			"value": ""
+		},
+		{
+			"key": "oneProductDescription",
+			"value": ""
+		},
+		{
+			"key": "nonexistentId",
+			"value": ""
+		},
+		{
+			"key": "nonexistentProductId",
+			"value": ""
+		}
+	]
+}
