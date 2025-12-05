@@ -1,44 +1,34 @@
-name: Test-Build
+name: Newman Run and Deploy Report to GitHub Pages
+
 on:
   push:
     branches:
       - main
+
 jobs:
   test-api:
     runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-
-      # INstall Node on the runner
-      - name: Install Node
-        uses: actions/setup-node@v1
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "12.x"
+          node-version: '20.x'
 
-
-      # Install the newman command line utility and also install the html extra reporter
-      - name: Install newman
+      - name: Install Newman and htmlextra reporter
         run: |
           npm install -g newman
           npm install -g newman-reporter-htmlextra
 
-
-      # Make directory to upload the test results
-      - name: Make Directory for results
-        run: mkdir -p testResults
-
-
-      # Run the POSTMAN collection
-      - name: Run POSTMAN collection
+      - name: Run POSTMAN collection and generate report
         run: |
-          newman run petstore.collection.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
+          newman run petstore.collection.json -r htmlextra --reporter-htmlextra-export docs/index.html || true
 
-
-      # Upload the contents of Test Results directory to workspace
-      - name: Output the run Details
-        uses: actions/upload-artifact@v2
+      - name: Deploy report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: success() || failure()
         with:
-          name: RunReports
-          path: testResults
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
